@@ -7,18 +7,31 @@ import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
     NfcAdapter mAdapter;
+    Button butBack;
     private PendingIntent mPendingIntent;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         resolveIntent(getIntent());
+        butBack = (Button) findViewById(R.id.butBack);
+        butBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent goBack = new Intent(MainActivity.this,MenuActivity.class);
+                startActivity(goBack);
+            }
+        });
 
         mAdapter = NfcAdapter.getDefaultAdapter(this);
         if (mAdapter == null) {
@@ -71,8 +84,10 @@ public class MainActivity extends AppCompatActivity {
                 };
 
                 byte[] result = isoDep.transceive(selectAID);
+                Toast.makeText(MainActivity.this,"NFC found", Toast.LENGTH_LONG).show();
             }
             catch (IOException e) {
+                Toast.makeText(MainActivity.this,"NFC can't be found", Toast.LENGTH_LONG).show();
 
             }
         }
