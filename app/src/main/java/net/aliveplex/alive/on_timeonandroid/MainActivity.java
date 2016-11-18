@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -72,6 +73,19 @@ public class MainActivity extends AppCompatActivity {
             Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
             IsoDep isoDep = IsoDep.get(tagFromIntent);
 
+            new IsoDepProcessor().execute(isoDep);
+        }
+    }
+
+    private class IsoDepProcessor extends AsyncTask<IsoDep, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(IsoDep... params) {
+            if (params[0] == null) {
+                return false;
+            }
+
+            IsoDep isoDep = params[0];
             try {
                 isoDep.connect();
                 byte[] selectAID = {
@@ -84,11 +98,28 @@ public class MainActivity extends AppCompatActivity {
                 };
 
                 byte[] result = isoDep.transceive(selectAID);
-                Toast.makeText(MainActivity.this,"NFC found", Toast.LENGTH_LONG).show();
+                isoDep.close();
+
+                if (result[0] == (byte)0x90) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+
             }
             catch (IOException e) {
-                Toast.makeText(MainActivity.this,"NFC can't be found", Toast.LENGTH_LONG).show();
+                return false;
+            }
+        }
 
+        @Override
+        protected void onPostExecute(Boolean connectResult) {
+            if (connectResult) {
+                Toast.makeText(MainActivity.this,"NFC found.", Toast.LENGTH_LONG).show();
+            }
+            else {
+                Toast.makeText(MainActivity.this,"IO failure, operation cancel or can't select AID.", Toast.LENGTH_LONG).show();
             }
         }
     }
