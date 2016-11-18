@@ -30,9 +30,6 @@
             android:name="android.nfc.action.TECH_DISCOVERED"
             android:resource="@xml/tech_support" />
 
-        <activity
-            android:name=".LoginActivity"
-            android:label="@string/title_activity_login" />
         <activity android:name=".MenuActivity"></activity>
     </application>
 
