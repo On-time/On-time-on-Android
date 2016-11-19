@@ -29,6 +29,8 @@
         <meta-data
             android:name="android.nfc.action.TECH_DISCOVERED"
             android:resource="@xml/tech_support" />
+        <meta-data android:name="android.nfc.disable_beam_default"
+            android:value="true" />
 
         <activity android:name=".MenuActivity"></activity>
     </application>

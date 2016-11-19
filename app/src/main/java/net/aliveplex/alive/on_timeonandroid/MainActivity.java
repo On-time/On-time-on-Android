@@ -116,10 +116,10 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Boolean connectResult) {
             if (connectResult) {
-                Toast.makeText(MainActivity.this,"NFC found.", Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this,"NFC found.", Toast.LENGTH_SHORT).show();
             }
             else {
-                Toast.makeText(MainActivity.this,"IO failure, operation cancel or can't select AID.", Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this,"IO failure, operation cancel or can't select AID.", Toast.LENGTH_SHORT).show();
             }
         }
     }
