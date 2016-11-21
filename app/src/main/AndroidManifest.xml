@@ -18,21 +18,12 @@
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <intent-filter>
-                <action android:name="android.nfc.action.TECH_DISCOVERED" />
-            </intent-filter>
         </activity>
-
-        <meta-data
-            android:name="android.nfc.action.TECH_DISCOVERED"
-            android:resource="@xml/tech_support" />
+        <activity android:name=".MenuActivity"></activity>
         <meta-data android:name="android.nfc.disable_beam_default"
             android:value="true" />
-
-        <activity android:name=".MenuActivity"></activity>
     </application>
 
 </manifest>

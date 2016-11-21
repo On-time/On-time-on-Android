@@ -2,12 +2,17 @@ package net.aliveplex.alive.on_timeonandroid;
 
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
 import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -24,7 +29,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        resolveIntent(getIntent());
         butBack = (Button) findViewById(R.id.butBack);
         butBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -47,8 +51,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
         if (mAdapter != null) {
-            mAdapter.enableForegroundDispatch(this, mPendingIntent, null, null);
+            IntentFilter techNfc = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
+            String[][] techListArray = new String[][] { new String[] { IsoDep.class.getName() }};
+
+            mAdapter.enableForegroundDispatch(this, mPendingIntent, new IntentFilter[] { techNfc }, techListArray);
         }
     }
 
@@ -79,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
 
     private class IsoDepProcessor extends AsyncTask<IsoDep, Void, Boolean> {
 
+        // This method is called in background thread. please read https://developer.android.com/reference/android/os/AsyncTask.html how to use AsyncTask, it very useful.
         @Override
         protected Boolean doInBackground(IsoDep... params) {
             if (params[0] == null) {
@@ -87,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
 
             IsoDep isoDep = params[0];
             try {
+                // the connect() and transceive() method mustn't be called from UI thread so we call it from background thread
                 isoDep.connect();
                 byte[] selectAID = {
                         (byte)0x80, // proprietary class
@@ -113,13 +123,16 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        // This method is called in MAIN thread aka. UI thread
         @Override
         protected void onPostExecute(Boolean connectResult) {
             if (connectResult) {
-                Toast.makeText(MainActivity.this,"NFC found.", Toast.LENGTH_SHORT).show();
+                // NFC was found and successfully communicated.
+                Toast.makeText(MainActivity.this,"NFC found.", Toast.LENGTH_LONG).show();
             }
             else {
-                Toast.makeText(MainActivity.this,"IO failure, operation cancel or can't select AID.", Toast.LENGTH_SHORT).show();
+                // NFC was found but can't communicated with it or card move away from reader while it being read
+                Toast.makeText(MainActivity.this,"IO failure, operation cancel or can't select AID.", Toast.LENGTH_LONG).show();
             }
         }
     }
