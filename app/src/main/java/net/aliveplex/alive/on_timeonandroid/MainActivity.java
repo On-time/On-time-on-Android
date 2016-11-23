@@ -106,7 +106,6 @@ public class MainActivity extends AppCompatActivity {
                 };
 
                 byte[] result = isoDep.transceive(selectAID);
-                isoDep.close();
 
                 if (result[0] == (byte)0x90) {
                     return true;
@@ -119,6 +118,13 @@ public class MainActivity extends AppCompatActivity {
             catch (IOException e) {
                 Log.d("On-time", "Error with exception" + e.getMessage());
                 return false;
+            }
+            finally {
+                try {
+                    isoDep.close();
+                }
+                catch (IOException ignore){
+                }
             }
         }
 
