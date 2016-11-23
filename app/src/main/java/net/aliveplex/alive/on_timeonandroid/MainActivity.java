@@ -7,11 +7,8 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
 import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -98,13 +95,14 @@ public class MainActivity extends AppCompatActivity {
             try {
                 // the connect() and transceive() method mustn't be called from UI thread so we call it from background thread
                 isoDep.connect();
+                // this command have some bytes that can't be explain, specifically, 0x04 and 0x05
                 byte[] selectAID = {
-                        (byte)0x80, // proprietary class
+                        (byte)0x00, // proprietary class
                         (byte)0xa4, // select instruction
                         (byte)0x04, // select by DF - AID
-                        (byte)0x0c, // First or only - no FCI
-                        (byte)0x06, // Lc field - have 6 bytes of command data
-                        (byte)0xF0, (byte)0x0E, (byte)0x85
+                        (byte)0x00, // First or only - no FCI
+                        (byte)0x05, // Lc field - have 5 bytes of command data
+                        (byte)0xF0, 0x00, 0x00, 0x0E, (byte)0x85
                 };
 
                 byte[] result = isoDep.transceive(selectAID);
@@ -119,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
             catch (IOException e) {
+                Log.d("On-time", "Error with exception" + e.getMessage());
                 return false;
             }
         }
