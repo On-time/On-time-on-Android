@@ -3,6 +3,10 @@ package net.aliveplex.alive.on_timeonandroid;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
@@ -15,10 +19,13 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
     NfcAdapter mAdapter;
     Button butBack;
+    Uri defaultRingtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+    MediaPlayer mediaPlayer = new MediaPlayer();
     private PendingIntent mPendingIntent;
 
 
@@ -133,6 +140,28 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Boolean connectResult) {
             if (connectResult) {
                 // NFC was found and successfully communicated.
+                try {
+                    mediaPlayer.setDataSource(MainActivity.this, defaultRingtoneUri);
+                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
+                    mediaPlayer.prepare();
+                    mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+
+                        @Override
+                        public void onCompletion(MediaPlayer mp)
+                        {
+                            mp.release();
+                        }
+                    });
+                    mediaPlayer.start();
+                } catch (IllegalArgumentException e) {
+                    e.printStackTrace();
+                } catch (SecurityException e) {
+                    e.printStackTrace();
+                } catch (IllegalStateException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 Toast.makeText(MainActivity.this,"NFC found.", Toast.LENGTH_LONG).show();
             }
             else {
@@ -141,4 +170,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+
 }
