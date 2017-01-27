@@ -20,9 +20,8 @@ public class useContentProvider extends ContentProvider{
     static UriMatcher matcher;
     {
         matcher = new UriMatcher((UriMatcher.NO_MATCH));
-        matcher.addURI("mydatabase","PRODUCTS",1);
-        matcher.addURI("mydatabase","SALES",2);
-        matcher.addURI("mydatabase","SALES_PRODUCT",3);
+        matcher.addURI("mydatabase","STUDENT",1);
+        matcher.addURI("mydatabase","SUBJECT",2);
     }
     @Override
     public boolean onCreate() {
