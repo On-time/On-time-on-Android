@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
     NfcAdapter mAdapter;
@@ -37,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         butBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent goBack = new Intent(MainActivity.this,MenuActivity.class);
+                Intent goBack = new Intent(MainActivity.this, MenuActivity.class);
                 startActivity(goBack);
             }
         });
@@ -89,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private class IsoDepProcessor extends AsyncTask<IsoDep, Void, Boolean> {
+    private class IsoDepProcessor extends AsyncTask<IsoDep, String, Boolean> {
 
         // This method is called in background thread. please read https://developer.android.com/reference/android/os/AsyncTask.html how to use AsyncTask, it very useful.
         @Override
@@ -114,13 +115,20 @@ public class MainActivity extends AppCompatActivity {
 
                 byte[] result = isoDep.transceive(selectAID);
 
-                if (result[0] == (byte)0x90) {
-                    return true;
-                }
-                else {
+                if (result[0] != (byte)0x90) {
+
                     return false;
                 }
 
+                result = isoDep.transceive("getid".getBytes("UTF-8"));
+                byte[] unknowcommand = "unknowcommand".getBytes("UTF-8");
+
+                if (Arrays.equals(result, unknowcommand)) {
+                    return false;
+                }
+                else {
+                    return true;
+                }
             }
             catch (IOException e) {
                 Log.d("On-time", "Error with exception" + e.getMessage());
@@ -140,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Boolean connectResult) {
             if (connectResult) {
                 // NFC was found and successfully communicated.
-                try {
+                /*try {
                     mediaPlayer.setDataSource(MainActivity.this, defaultRingtoneUri);
                     mediaPlayer.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
                     mediaPlayer.prepare();
@@ -161,12 +169,19 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();
-                }
+                }*/
                 Toast.makeText(MainActivity.this,"NFC found.", Toast.LENGTH_LONG).show();
             }
             else {
                 // NFC was found but can't communicated with it or card move away from reader while it being read
                 Toast.makeText(MainActivity.this,"IO failure, operation cancel or can't select AID.", Toast.LENGTH_LONG).show();
+            }
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+            if (values.length > 0) {
+                Toast.makeText(MainActivity.this, values[0], Toast.LENGTH_LONG).show();
             }
         }
     }
