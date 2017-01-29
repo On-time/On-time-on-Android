@@ -9,7 +9,7 @@ import io.realm.annotations.PrimaryKey;
 
 public class SubjectStudent extends RealmObject{
     @PrimaryKey
-    private String ID;
+    private String ID; // รหัสนักศึกษา-รหัสวิชา-sec
 
     public String getID() {return ID;}
     public void setID(String ID) {this.ID = ID;}
