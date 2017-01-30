@@ -5,14 +5,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
-import android.support.annotation.IdRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -24,6 +20,10 @@ import android.widget.Toast;
 
 import com.google.common.io.CharStreams;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import net.aliveplex.alive.on_timeonandroid.Message.RegisterReturnStatus;
+import net.aliveplex.alive.on_timeonandroid.Message.RegisterReturnStatusDeserializer;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -42,32 +42,33 @@ public class MenuActivity extends AppCompatActivity {
     Dialog login;
     Button butNFC,butTable,butLogin,butClear;
     EditText etUser,etPass;
-    String studentID;
-    SharedPreferences sp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sp = PreferenceManager.getDefaultSharedPreferences(MenuActivity.this);
-        studentID = sp.getString("et_pr_id","000").toString();
         setContentView(R.layout.activity_menu);
+
         login = new Dialog(MenuActivity.this);
         login.setContentView(R.layout.activity_login);
         login.setTitle("Login");
         login.setCancelable(true);
+
         etUser = (EditText) login.findViewById(R.id.etUser);
         etPass = (EditText) login.findViewById(R.id.etPass);
         butLogin = (Button) login.findViewById(R.id.butLogin);
         butClear = (Button) login.findViewById(R.id.butClear);
         butNFC = (Button) findViewById(R.id.butNFC);
+
         final String androidId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+
         butNFC.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent goNFC = new Intent(MenuActivity.this,MainActivity.class);
+                Intent goNFC = new Intent(MenuActivity.this, MainActivity.class);
                 startActivity(goNFC);
             }
         });
+
         butTable = (Button) findViewById(R.id.butTable);
         butTable.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,6 +76,7 @@ public class MenuActivity extends AppCompatActivity {
 
             }
         });
+
         butLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -94,6 +96,7 @@ public class MenuActivity extends AppCompatActivity {
             }
             }
         });
+
         butClear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -108,6 +111,8 @@ public class MenuActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+        LoginCheck();
     }
 
 
@@ -133,6 +138,14 @@ public class MenuActivity extends AppCompatActivity {
                 break;
         }
         return true;
+    }
+
+    protected void LoginCheck() {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+
+        if(sp.getInt(Constant.FIRSTTIMELOGIN, 0) == 0){
+            login.show();
+        }
     }
 
     private static class SendRegisterAsync extends AsyncTask<RegisterInfo, String, String> {
@@ -199,7 +212,10 @@ public class MenuActivity extends AppCompatActivity {
             if (jsonString == null) {
                 return;
             }
-            Gson gson = new Gson();
+
+            GsonBuilder gsonBuilder = new GsonBuilder();
+            gsonBuilder.registerTypeAdapter(RegisterReturnStatus.class, new RegisterReturnStatusDeserializer());
+            Gson gson = gsonBuilder.create();
             RegisterReturnStatus result = gson.fromJson(jsonString, RegisterReturnStatus.class);
 
             if (result == null) {
@@ -207,7 +223,7 @@ public class MenuActivity extends AppCompatActivity {
                 return;
             }
 
-            if (result.getStatus().equals("register student completed")) {
+            if (result.getStatus().equals("register lecturer completed")) {
                 SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(_context);
                 SharedPreferences.Editor spEditor = sp.edit();
 
@@ -215,6 +231,7 @@ public class MenuActivity extends AppCompatActivity {
                 spEditor.putString(Constant.AndroidIdSpKey, _regisInfo.getAndroidId());
                 spEditor.putInt(Constant.FIRSTTIMELOGIN, 1);
                 spEditor.apply();
+                // process result of register here
                 Toast.makeText(_context, "register completed", Toast.LENGTH_SHORT).show();
             }
             else if (result.getStatus().equals("username or password invalid")) {
@@ -273,17 +290,5 @@ public class MenuActivity extends AppCompatActivity {
         private String username;
         private String password;
         private String androidId;
-    }
-
-    private static class RegisterReturnStatus {
-        private String status;
-
-        public RegisterReturnStatus(String status) {
-            this.status = status;
-        }
-
-        public String getStatus() {
-            return status;
-        }
     }
 }

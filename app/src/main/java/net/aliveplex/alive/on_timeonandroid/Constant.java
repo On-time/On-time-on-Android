@@ -11,7 +11,7 @@ public class Constant {
 
     public static final int INTERNET_ACCESS_RESULT = 1;
 
-    public static final String REGISTER_URL = "http://192.168.1.37:40437/api/register/student";
+    public static final String REGISTER_URL = "http://192.168.1.37:40437/api/register/lecturer";
 
     public static final String FIRSTTIMELOGIN = "firsttime";
 }
