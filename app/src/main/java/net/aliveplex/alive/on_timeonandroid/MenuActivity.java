@@ -11,6 +11,7 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -121,7 +122,10 @@ public class MenuActivity extends AppCompatActivity {
                 startActivity(gonext);
             }
         });
+        Realm.init(this
+        );
         LoginCheck();
+        setTable();
     }
 
 
@@ -245,18 +249,23 @@ public class MenuActivity extends AppCompatActivity {
                 realm.executeTransactionAsync(new Realm.Transaction() {
                     @Override
                     public void execute(Realm realm) {
-                        Student student = realm.createObject(Student.class);
+                        //Student student = realm.createObject(Student.class);
                         for (int i = 0; i < result.getStudents().length; i++) {
-                            student.setID(result.getStudents()[i].getId().toString());
-                            student.setAndroidID(result.getStudents()[i].getAndroidId().toString());
+                            Student student = realm.createObject(Student.class, result.getStudents()[i].getId().toString());
+                            //student.setID(result.getStudents()[i].getId().toString());
+                            if (result.getStudents()[i].getAndroidId() != null) {
+                                student.setAndroidID(result.getStudents()[i].getAndroidId().toString());
+                            }
                         }
-                        Subject subject = realm.createObject(Subject.class);
+                        //Subject subject = realm.createObject(Subject.class);
                         for (int i = 0; i < result.getSubjects().length; i++) {
-                            subject.setID(result.getSubjects()[i].getId()+","+result.getSubjects()[i].getSection());
+                            Subject subject = realm.createObject(Subject.class, result.getSubjects()[i].getId()+","+result.getSubjects()[i].getSection());
+                            //subject.setID(result.getSubjects()[i].getId()+","+result.getSubjects()[i].getSection());
                         }
-                        SubjectStudent subjectstudent = realm.createObject(SubjectStudent.class);
+                        //SubjectStudent subjectstudent = realm.createObject(SubjectStudent.class);
                         for (int i = 0; i < result.getSubjectStudents().length; i++) {
-                            subjectstudent.setID(result.getSubjectStudents()[i].getStudentId()+","+result.getSubjectStudents()[i].getSubjectId()+","+result.getSubjectStudents()[i].getSubjectSection());
+                            SubjectStudent subjectstudent = realm.createObject(SubjectStudent.class, result.getSubjectStudents()[i].getStudentId()+","+result.getSubjectStudents()[i].getSubjectId()+","+result.getSubjectStudents()[i].getSubjectSection());
+                            //subjectstudent.setID(result.getSubjectStudents()[i].getStudentId()+","+result.getSubjectStudents()[i].getSubjectId()+","+result.getSubjectStudents()[i].getSubjectSection());
                         }
                     }
                 }, new Realm.Transaction.OnSuccess() {
@@ -334,13 +343,16 @@ public class MenuActivity extends AppCompatActivity {
      void setTable(){
         final Realm realm = Realm.getDefaultInstance();
         realm.executeTransactionAsync(new Realm.Transaction() {
-            SimpleAdapter myAdepter = null;
-            List<HashMap<String,String>> fill_data=new ArrayList<HashMap<String,String>>();
-            final RealmQuery<Subject> subject = realm.where(Subject.class);
-            final RealmResults<Subject> result = subject.findAll();
-            String readdata = "";
+
             @Override
             public void execute(Realm realm) {
+                SimpleAdapter myAdepter = null;
+                List<HashMap<String,String>> fill_data=new ArrayList<HashMap<String,String>>();
+                final RealmQuery<Subject> subject = realm.where(Subject.class);
+                final RealmResults<Subject> result = subject.findAll();
+                String readdata = "";
+
+                Log.i("List view", "executed ran");
                 for (int i = 0; i < result.size(); i++) {
                     HashMap<String,String> myMap = new HashMap<String, String>();
                     readdata = result.get(i).getID();
@@ -353,6 +365,7 @@ public class MenuActivity extends AppCompatActivity {
                 int [] to=new int[]{R.id.tvSubject,R.id.tvSec};
                 myAdepter = new SimpleAdapter(MenuActivity.this,fill_data,R.layout.subject_layout,from,to);
                 lv.setAdapter(myAdepter);
+                Log.i("List view", "Adapter set");
             }
         }, new Realm.Transaction.OnSuccess() {
             @Override
