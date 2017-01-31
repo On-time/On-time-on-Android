@@ -14,8 +14,11 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import com.google.common.io.CharStreams;
@@ -24,6 +27,9 @@ import com.google.gson.GsonBuilder;
 
 import net.aliveplex.alive.on_timeonandroid.Message.RegisterReturnStatus;
 import net.aliveplex.alive.on_timeonandroid.Message.RegisterReturnStatusDeserializer;
+import net.aliveplex.alive.on_timeonandroid.Message.SimpleStudent;
+import net.aliveplex.alive.on_timeonandroid.Message.SimpleSubject;
+import net.aliveplex.alive.on_timeonandroid.Message.SimpleSubjectStudent;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -33,16 +39,24 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+import io.realm.RealmObject;
+import io.realm.RealmQuery;
+import io.realm.RealmResults;
 
 import static android.text.TextUtils.isEmpty;
 
 public class MenuActivity extends AppCompatActivity {
     Dialog login;
-    Button butNFC,butTable,butLogin,butClear;
+    Button butLogin,butClear;
     EditText etUser,etPass;
-
+    ListView lv;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,25 +71,9 @@ public class MenuActivity extends AppCompatActivity {
         etPass = (EditText) login.findViewById(R.id.etPass);
         butLogin = (Button) login.findViewById(R.id.butLogin);
         butClear = (Button) login.findViewById(R.id.butClear);
-        butNFC = (Button) findViewById(R.id.butNFC);
 
         final String androidId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        butNFC.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent goNFC = new Intent(MenuActivity.this, MainActivity.class);
-                startActivity(goNFC);
-            }
-        });
-
-        butTable = (Button) findViewById(R.id.butTable);
-        butTable.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
 
         butLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -111,8 +109,15 @@ public class MenuActivity extends AppCompatActivity {
                 finish();
             }
         });
-
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent gonext = new Intent(MenuActivity.this,MainActivity.class);
+                startActivity(gonext);
+            }
+        });
         LoginCheck();
+        setTable();
     }
 
 
@@ -216,7 +221,7 @@ public class MenuActivity extends AppCompatActivity {
             GsonBuilder gsonBuilder = new GsonBuilder();
             gsonBuilder.registerTypeAdapter(RegisterReturnStatus.class, new RegisterReturnStatusDeserializer());
             Gson gson = gsonBuilder.create();
-            RegisterReturnStatus result = gson.fromJson(jsonString, RegisterReturnStatus.class);
+            final RegisterReturnStatus result = gson.fromJson(jsonString, RegisterReturnStatus.class);
 
             if (result == null) {
                 Toast.makeText(_context, "Error: can't process result", Toast.LENGTH_SHORT).show();
@@ -232,6 +237,36 @@ public class MenuActivity extends AppCompatActivity {
                 spEditor.putInt(Constant.FIRSTTIMELOGIN, 1);
                 spEditor.apply();
                 // process result of register here
+                Realm realm = Realm.getDefaultInstance();
+                realm.executeTransactionAsync(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        Student student = realm.createObject(Student.class);
+                        for (int i = 0; i < result.getStudents().length; i++) {
+                            student.setID(result.getStudents()[i].getId().toString());
+                            student.setAndroidID(result.getStudents()[i].getAndroidId().toString());
+                        }
+                        Subject subject = realm.createObject(Subject.class);
+                        for (int i = 0; i < result.getSubjects().length; i++) {
+                            subject.setID(result.getSubjects()[i].getId()+","+result.getSubjects()[i].getSection());
+                        }
+                        SubjectStudent subjectstudent = realm.createObject(SubjectStudent.class);
+                        for (int i = 0; i < result.getSubjectStudents().length; i++) {
+                            subjectstudent.setID(result.getSubjectStudents()[i].getStudentId()+","+result.getSubjectStudents()[i].getSubjectId()+","+result.getSubjectStudents()[i].getSubjectSection());
+                        }
+                    }
+                }, new Realm.Transaction.OnSuccess() {
+                    @Override
+                    public void onSuccess() {
+
+                    }
+                }, new Realm.Transaction.OnError() {
+                    @Override
+                    public void onError(Throwable error) {
+
+                    }
+                });
+
                 Toast.makeText(_context, "register completed", Toast.LENGTH_SHORT).show();
             }
             else if (result.getStatus().equals("username or password invalid")) {
@@ -291,4 +326,43 @@ public class MenuActivity extends AppCompatActivity {
         private String password;
         private String androidId;
     }
+
+    void setTable(){
+        final Realm realm = Realm.getDefaultInstance();
+        realm.executeTransactionAsync(new Realm.Transaction() {
+            SimpleAdapter myAdepter = null;
+            List<HashMap<String,String>> fill_data=new ArrayList<HashMap<String,String>>();
+            final RealmQuery<Subject> subject = realm.where(Subject.class);
+            final RealmResults<Subject> result = subject.findAll();
+            String readdata = "";
+            @Override
+            public void execute(Realm realm) {
+                for (int i = 0; i < result.size(); i++) {
+                    HashMap<String,String> myMap = new HashMap<String, String>();
+                    Subject subject1 = result.get(i);
+                    readdata = subject1.getID();
+                    String[] splitLine = readdata.split(",");
+                    myMap.put("ID", splitLine[0]);
+                    myMap.put("Sec", splitLine[1]);
+                    fill_data.add(myMap);
+                }
+                String[] from = new String []{"ID","Sec"};
+                int [] to=new int[]{R.id.tvSubject,R.id.tvSec};
+                myAdepter = new SimpleAdapter(MenuActivity.this,fill_data,R.layout.subject_layout,from,to);
+                lv.setAdapter(myAdepter);
+            }
+        }, new Realm.Transaction.OnSuccess() {
+            @Override
+            public void onSuccess() {
+
+            }
+        }, new Realm.Transaction.OnError() {
+            @Override
+            public void onError(Throwable error) {
+
+            }
+        });
+
+    }
+
 }
