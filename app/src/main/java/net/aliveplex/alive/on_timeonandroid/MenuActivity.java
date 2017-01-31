@@ -72,6 +72,8 @@ public class MenuActivity extends AppCompatActivity {
         butLogin = (Button) login.findViewById(R.id.butLogin);
         butClear = (Button) login.findViewById(R.id.butClear);
 
+        lv = (ListView) findViewById(R.id.lv);
+
         final String androidId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
 
