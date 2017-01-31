@@ -112,7 +112,10 @@ public class MenuActivity extends AppCompatActivity {
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                HashMap<String,String> read_data = (HashMap<String,String>) lv.getItemAtPosition(position);
                 Intent gonext = new Intent(MenuActivity.this,MainActivity.class);
+                gonext.putExtra("ID",read_data.get("ID"));
+                gonext.putExtra("Sec",read_data.get("Sec"));
                 startActivity(gonext);
             }
         });

@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -25,6 +26,9 @@ import java.util.Arrays;
 public class MainActivity extends AppCompatActivity {
     NfcAdapter mAdapter;
     Button butBack;
+    TextView tvSubID;
+    String SubID = getIntent().getStringExtra("ID");
+    String SubSec = getIntent().getStringExtra("Sec");
     Uri defaultRingtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
     MediaPlayer mediaPlayer = new MediaPlayer();
     private PendingIntent mPendingIntent;
@@ -34,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        tvSubID = (TextView) findViewById(R.id.tvSubID);
+        tvSubID.setText(SubID);
         butBack = (Button) findViewById(R.id.butBack);
         butBack.setOnClickListener(new View.OnClickListener() {
             @Override
