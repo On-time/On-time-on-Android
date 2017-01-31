@@ -122,7 +122,6 @@ public class MenuActivity extends AppCompatActivity {
             }
         });
         LoginCheck();
-        setTable();
     }
 
 
@@ -263,7 +262,7 @@ public class MenuActivity extends AppCompatActivity {
                 }, new Realm.Transaction.OnSuccess() {
                     @Override
                     public void onSuccess() {
-
+                        ((MenuActivity)_context).setTable();
                     }
                 }, new Realm.Transaction.OnError() {
                     @Override
@@ -332,7 +331,7 @@ public class MenuActivity extends AppCompatActivity {
         private String androidId;
     }
 
-    void setTable(){
+     void setTable(){
         final Realm realm = Realm.getDefaultInstance();
         realm.executeTransactionAsync(new Realm.Transaction() {
             SimpleAdapter myAdepter = null;
@@ -344,8 +343,7 @@ public class MenuActivity extends AppCompatActivity {
             public void execute(Realm realm) {
                 for (int i = 0; i < result.size(); i++) {
                     HashMap<String,String> myMap = new HashMap<String, String>();
-                    Subject subject1 = result.get(i);
-                    readdata = subject1.getID();
+                    readdata = result.get(i).getID();
                     String[] splitLine = readdata.split(",");
                     myMap.put("ID", splitLine[0]);
                     myMap.put("Sec", splitLine[1]);
