@@ -69,7 +69,7 @@ public class ListAdapter extends BaseAdapter {
     String[] subID;
     int[] sec;
 
-    public ListAdapter(Context context, int subID, String[] sec) {
+    public ListAdapter(Context context, String[] subID, int[] sec) {
         this.mContext= context;
         this.subID = subID;
         this.sec = sec;

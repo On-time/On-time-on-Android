@@ -353,30 +353,27 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     private void setTable() {
-        //final String[] subID = new String[0];
-        //final String[] subsec = new String[0];
-        String[] subID = { "Aerith Gainsborough", "Barret Wallace", "Cait Sith"
-                , "Cid Highwind", "Cloud Strife", "RedXIII", "Sephiroth"
-                , "Tifa Lockhart", "Vincent Valentine", "Yuffie Kisaragi"
-                , "ZackFair" };
+        final String[] subID = new String[0];
+        final int[] subsec = new int[0];
         final Realm realm = Realm.getDefaultInstance();
         realm.executeTransactionAsync(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
                 final RealmQuery<Subject> subject = realm.where(Subject.class);
                 final RealmResults<Subject> result = subject.findAll();
-               // final int[] subID = new int[result.size()];
-                //final String[] subsec = new String[result.size()];
+               final String[] subID = new String[result.size()];
+                final int[] subsec = new int[result.size()];
                 String readdata = "";
 
                 Log.i("List view", "executed ran");
-                /*for (int i = 0; i < result.size(); i++) {
+                for (int i = 0; i < result.size(); i++) {
                     HashMap<String,String> myMap = new HashMap<String, String>();
                     readdata = result.get(i).getID();
                     String[] splitLine = readdata.split(",");
-                    subID[i] = Integer.parseInt(splitLine[0]);
+                    subID[i] = splitLine[0];
+                    subsec[i] = Integer.parseInt(splitLine[1]);
 
-                }*/
+                }
                 String[] from = new String []{"ID","Sec"};
                 int [] to=new int[]{R.id.tvSubject,R.id.tvSec};
                 Log.i("List view", "reached setAdapter");
@@ -393,7 +390,7 @@ public class MenuActivity extends AppCompatActivity {
                 Log.d("Set table", "error when setting table: " + error.getMessage());
             }
         });
-        ListAdapter adapter = new ListAdapter(getApplicationContext(), list, subID);
+        ListAdapter adapter = new ListAdapter(getApplicationContext(), subID, subsec);
         ListView listView = (ListView)findViewById(R.id.lv);
         listView.setAdapter(adapter);
         lv.invalidateViews();
