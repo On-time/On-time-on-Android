@@ -1,4 +1,4 @@
-package net.aliveplex.alive.on_timeonandroid;
+/*package net.aliveplex.alive.on_timeonandroid;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -21,7 +21,7 @@ import io.realm.RealmResults;
 /**
  * Created by snail on 2/1/2017.
  */
-
+/*
 public class ListAdapter extends ArrayAdapter<Subject>{
     private final Context context;
     private final ArrayList<Subject> itemsArrayList;
@@ -31,6 +31,8 @@ public class ListAdapter extends ArrayAdapter<Subject>{
         this.context = context;
         this.itemsArrayList = itemsArrayList;
     }
+
+
 
     @NonNull
     @Override
@@ -51,4 +53,53 @@ public class ListAdapter extends ArrayAdapter<Subject>{
 
     }
 
+}
+*/
+package net.aliveplex.alive.on_timeonandroid;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+public class ListAdapter extends BaseAdapter {
+    Context mContext;
+    String[] subId;
+    int[] sec;
+
+    public ListAdapter(Context context, int strName, String[] sec) {
+        this.mContext= context;
+        this.subId = strName;
+        this.sec = sec;
+    }
+
+    public int getCount() {
+        return subId.length;
+    }
+
+    public Object getItem(int position) {
+        return null;
+    }
+
+    public long getItemId(int position) {
+        return 0;
+    }
+
+    public View getView(int position, View view, ViewGroup parent) {
+        LayoutInflater mInflater =
+                (LayoutInflater)mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        if(view == null)
+            view = mInflater.inflate(R.layout.listtextview, parent, false);
+
+        TextView SubID = (TextView)view.findViewById(R.id.text1);
+        SubID.setText(subId[position]);
+        TextView Sec = (TextView)view.findViewById(R.id.text2);
+        Sec.setText(sec[position]);
+
+        return view;
+    }
 }

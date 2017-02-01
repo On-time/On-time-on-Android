@@ -53,6 +53,7 @@ import io.realm.RealmObject;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
 
+import static android.R.id.list;
 import static android.text.TextUtils.isEmpty;
 
 public class MenuActivity extends AppCompatActivity {
@@ -352,14 +353,16 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     private void setTable() {
+        final String[] subID = new String[0];
+        final String[] subsec = new String[0];
         final Realm realm = Realm.getDefaultInstance();
         realm.executeTransactionAsync(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                SimpleAdapter myAdepter = null;
-                List<HashMap<String,String>> fill_data=new ArrayList<HashMap<String,String>>();
                 final RealmQuery<Subject> subject = realm.where(Subject.class);
                 final RealmResults<Subject> result = subject.findAll();
+                final int[] subID = new int[result.size()];
+                final String[] subsec = new String[result.size()];
                 String readdata = "";
 
                 Log.i("List view", "executed ran");
@@ -367,15 +370,12 @@ public class MenuActivity extends AppCompatActivity {
                     HashMap<String,String> myMap = new HashMap<String, String>();
                     readdata = result.get(i).getID();
                     String[] splitLine = readdata.split(",");
-                    myMap.put("ID", splitLine[0]);
-                    myMap.put("Sec", splitLine[1]);
-                    fill_data.add(myMap);
+                    subID[i] = Integer.parseInt(splitLine[0]);
+
                 }
                 String[] from = new String []{"ID","Sec"};
                 int [] to=new int[]{R.id.tvSubject,R.id.tvSec};
-                myAdepter = new SimpleAdapter(MenuActivity.this,fill_data,R.layout.subject_layout,from,to);
                 Log.i("List view", "reached setAdapter");
-                lv.setAdapter(myAdepter);
                 Log.i("List view", "Adapter set, have result " + result.size());
             }
         }, new Realm.Transaction.OnSuccess() {
@@ -389,6 +389,9 @@ public class MenuActivity extends AppCompatActivity {
                 Log.d("Set table", "error when setting table: " + error.getMessage());
             }
         });
+        ListAdapter adapter = new ListAdapter(getApplicationContext(), list, subID);
+        ListView listView = (ListView)findViewById(R.id.lv);
+        listView.setAdapter(adapter);
         lv.invalidateViews();
 
     }
