@@ -117,15 +117,16 @@ public class MenuActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 HashMap<String,String> read_data = (HashMap<String,String>) lv.getItemAtPosition(position);
                 Intent gonext = new Intent(MenuActivity.this,MainActivity.class);
+                Log.d("list view item", "Id is " + read_data.get("ID"));
                 gonext.putExtra("ID",read_data.get("ID"));
                 gonext.putExtra("Sec",read_data.get("Sec"));
                 startActivity(gonext);
             }
         });
-        Realm.init(this
-        );
+
+        Realm.init(this);
         LoginCheck();
-        setTable();
+        shouldSetTable();
     }
 
 
@@ -340,7 +341,16 @@ public class MenuActivity extends AppCompatActivity {
         private String androidId;
     }
 
-     void setTable(){
+    private void shouldSetTable() {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+
+        if(sp.getInt(Constant.FIRSTTIMELOGIN, 0) != 0){
+            setTable();
+            Log.d("Set table", "table is setting");
+        }
+    }
+
+    void setTable() {
         final Realm realm = Realm.getDefaultInstance();
         realm.executeTransactionAsync(new Realm.Transaction() {
 
@@ -364,18 +374,19 @@ public class MenuActivity extends AppCompatActivity {
                 String[] from = new String []{"ID","Sec"};
                 int [] to=new int[]{R.id.tvSubject,R.id.tvSec};
                 myAdepter = new SimpleAdapter(MenuActivity.this,fill_data,R.layout.subject_layout,from,to);
+                Log.i("List view", "reached setAdapter");
                 lv.setAdapter(myAdepter);
-                Log.i("List view", "Adapter set");
+                Log.i("List view", "Adapter set, have result " + result.size());
             }
         }, new Realm.Transaction.OnSuccess() {
             @Override
             public void onSuccess() {
-
+                Log.d("Set table", "setting table complete");
             }
         }, new Realm.Transaction.OnError() {
             @Override
             public void onError(Throwable error) {
-
+                Log.d("Set table", "error when setting table: " + error.getMessage());
             }
         });
 

@@ -27,9 +27,9 @@ public class MainActivity extends AppCompatActivity {
     NfcAdapter mAdapter;
     Button butBack;
     TextView tvSubID;
-    String SubID = getIntent().getStringExtra("ID");
-    String SubSec = getIntent().getStringExtra("Sec");
-    Uri defaultRingtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+    String SubID;
+    String SubSec;
+    Uri defaultRingtoneUri;
     MediaPlayer mediaPlayer = new MediaPlayer();
     private PendingIntent mPendingIntent;
 
@@ -37,6 +37,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        SubID = getIntent().getStringExtra("ID");
+        SubSec = getIntent().getStringExtra("Sec");
+        defaultRingtoneUri =  RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
         setContentView(R.layout.activity_main);
         tvSubID = (TextView) findViewById(R.id.tvSubID);
         tvSubID.setText(SubID);
