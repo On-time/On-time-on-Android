@@ -1,6 +1,7 @@
 package net.aliveplex.alive.on_timeonandroid;
 
 import android.app.Dialog;
+import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -16,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -72,7 +74,6 @@ public class MenuActivity extends AppCompatActivity {
         etPass = (EditText) login.findViewById(R.id.etPass);
         butLogin = (Button) login.findViewById(R.id.butLogin);
         butClear = (Button) login.findViewById(R.id.butClear);
-
         lv = (ListView) findViewById(R.id.lv);
 
         final String androidId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -350,10 +351,9 @@ public class MenuActivity extends AppCompatActivity {
         }
     }
 
-    void setTable() {
+    private void setTable() {
         final Realm realm = Realm.getDefaultInstance();
         realm.executeTransactionAsync(new Realm.Transaction() {
-
             @Override
             public void execute(Realm realm) {
                 SimpleAdapter myAdepter = null;
@@ -389,7 +389,9 @@ public class MenuActivity extends AppCompatActivity {
                 Log.d("Set table", "error when setting table: " + error.getMessage());
             }
         });
+        lv.invalidateViews();
 
     }
+
 
 }
