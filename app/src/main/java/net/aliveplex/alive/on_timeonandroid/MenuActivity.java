@@ -121,9 +121,9 @@ public class MenuActivity extends AppCompatActivity {
                 TextView text1 = (TextView) view.findViewById(R.id.text1);
                 TextView text2 = (TextView) view.findViewById(R.id.text2);
                 String subid = text1.getText().toString();
-                String sec = text2.getText().toString();
+                int sec = Integer.parseInt(text2.getText().toString());
                 Intent gonext = new Intent(MenuActivity.this,MainActivity.class);
-                Log.d("list view item", "Id is " + subid);
+                Log.d("list view item", "Id is " + subid + " section is " + sec);
                 gonext.putExtra("ID",subid);
                 gonext.putExtra("Sec",sec);
                 startActivity(gonext);
@@ -248,6 +248,7 @@ public class MenuActivity extends AppCompatActivity {
                 SharedPreferences.Editor spEditor = sp.edit();
 
                 spEditor.putString(Constant.UsernameSpKey, _regisInfo.getUsername());
+                spEditor.putString(Constant.PasswordSpKey, _regisInfo.getPassword());
                 spEditor.putString(Constant.AndroidIdSpKey, _regisInfo.getAndroidId());
                 spEditor.putInt(Constant.FIRSTTIMELOGIN, 1);
                 spEditor.apply();

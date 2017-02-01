@@ -25,27 +25,20 @@ import java.util.Map;
 
 public class JWTUtil {
     private static JWTUtil _instance = new JWTUtil();
-    private Calendar expire;
+    //private Calendar expire;
     private String token;
 
     public String getToken(String username, String password, boolean requestCheckingToken, boolean getNewToken) {
         HttpURLConnection urlConnection = null;
 
         try {
-            if (expire != null && !getNewToken) {
-                Calendar current = Calendar.getInstance();
-                if (current.compareTo(expire) < 0) {
-                    return token;
-                }
-            }
-
             Map<String, String> requestBody = new HashMap<>();
             requestBody.put("username", username);
             requestBody.put("password", password);
             requestBody.put("requestCheckingToken", String.valueOf(requestCheckingToken));
             byte[] bytesBody = getQuery(requestBody).getBytes("UTF-8");
 
-            urlConnection = (HttpURLConnection)new URL(Constant.REGISTER_URL).openConnection();
+            urlConnection = (HttpURLConnection)new URL(Constant.REQUESTTOKEN_URL).openConnection();
             urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             urlConnection.setFixedLengthStreamingMode(bytesBody.length);
             urlConnection.setDoOutput(true);
@@ -61,8 +54,6 @@ public class JWTUtil {
             String jsonString = CharStreams.toString(new InputStreamReader(in, "UTF-8"));
             Gson gson = new Gson();
             RequestTokenMessage message = gson.fromJson(jsonString, RequestTokenMessage.class);
-            expire = Calendar.getInstance();
-            expire.set(Calendar.SECOND, message.getExpires_in());
             token = message.getAccess_token();
 
             return token;
