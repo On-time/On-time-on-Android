@@ -22,6 +22,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.common.io.CharStreams;
@@ -117,11 +118,14 @@ public class MenuActivity extends AppCompatActivity {
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                HashMap<String,String> read_data = (HashMap<String,String>) lv.getItemAtPosition(position);
+                TextView text1 = (TextView) view.findViewById(R.id.text1);
+                TextView text2 = (TextView) view.findViewById(R.id.text2);
+                String subid = text1.getText().toString();
+                String sec = text2.getText().toString();
                 Intent gonext = new Intent(MenuActivity.this,MainActivity.class);
-                Log.d("list view item", "Id is " + read_data.get("ID"));
-                gonext.putExtra("ID",read_data.get("ID"));
-                gonext.putExtra("Sec",read_data.get("Sec"));
+                Log.d("list view item", "Id is " + subid);
+                gonext.putExtra("ID",subid);
+                gonext.putExtra("Sec",sec);
                 startActivity(gonext);
             }
         });

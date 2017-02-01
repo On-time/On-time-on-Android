@@ -87,6 +87,14 @@ public class ListAdapter extends BaseAdapter {
         return 0;
     }
 
+    public String[] getSubID(){
+        return subID;
+    }
+
+    public int[] getSec(){
+        return sec;
+    }
+
     public View getView(int position, View view, ViewGroup parent) {
         LayoutInflater mInflater =
                 (LayoutInflater)mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
