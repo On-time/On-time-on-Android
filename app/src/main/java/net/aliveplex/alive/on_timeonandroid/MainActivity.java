@@ -22,6 +22,12 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+import io.realm.Realm;
+import io.realm.RealmQuery;
+import io.realm.RealmResults;
 
 public class MainActivity extends AppCompatActivity {
     NfcAdapter mAdapter;
@@ -30,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     String SubID;
     String SubSec;
     Uri defaultRingtoneUri;
+    HashMap<String, String> currentStudents;
     MediaPlayer mediaPlayer = new MediaPlayer();
     private PendingIntent mPendingIntent;
 
@@ -37,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         SubID = getIntent().getStringExtra("ID");
         SubSec = getIntent().getStringExtra("Sec");
         defaultRingtoneUri =  RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
@@ -62,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
         mPendingIntent = PendingIntent.getActivity(this, 0,
                 new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+        loadStudentDataToMemory();
     }
 
     @Override
@@ -101,14 +109,45 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private class IsoDepProcessor extends AsyncTask<IsoDep, String, Boolean> {
+    private void loadStudentDataToMemory() {
+        if (currentStudents != null) {
+            return;
+        }
+
+        Realm realm = Realm.getDefaultInstance();
+        realm.executeTransactionAsync(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                final RealmQuery<Student> studentQuery = realm.where(Student.class);
+                final RealmResults<Student> result = studentQuery.findAll();
+                currentStudents = new HashMap<>();
+
+                for (int i = 0; i < result.size(); i++) {
+                    Student student = result.get(i);
+                    currentStudents.put(student.getID(), student.getAndroidID());
+                }
+
+                Log.i("Load students to memory", "load " + result.size() + " students completed, but current studentsize is " + currentStudents.size());
+            }
+        }, new Realm.Transaction.OnSuccess() {
+            @Override
+            public void onSuccess() {
+                Toast.makeText(MainActivity.this,"Reader is ready.", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private class IsoDepProcessor extends AsyncTask<IsoDep, String, String> {
 
         // This method is called in background thread. please read https://developer.android.com/reference/android/os/AsyncTask.html how to use AsyncTask, it very useful.
         @Override
-        protected Boolean doInBackground(IsoDep... params) {
+        protected String doInBackground(IsoDep... params) {
             if (params[0] == null) {
-                return false;
+                return null;
             }
+
+            if(android.os.Debug.isDebuggerConnected())
+                android.os.Debug.waitForDebugger();
 
             IsoDep isoDep = params[0];
             try {
@@ -128,22 +167,42 @@ public class MainActivity extends AppCompatActivity {
 
                 if (result[0] != (byte)0x90) {
 
-                    return false;
+                    return null;
                 }
 
                 result = isoDep.transceive("getid".getBytes("UTF-8"));
                 byte[] unknowcommand = "unknowcommand".getBytes("UTF-8");
 
                 if (Arrays.equals(result, unknowcommand)) {
-                    return false;
+                    return null;
                 }
                 else {
-                    return true;
+                    String msg = new String(result, "UTF-8");
+                    String[] studentData = msg.split(",");
+                    publishProgress("Message is " + msg);
+
+                    if (currentStudents.containsKey(studentData[0])) {
+                        Log.i("NFC reader", "List contain key, value is " + studentData[0]);
+                        String androidId = currentStudents.get(studentData[0]);
+                        if (androidId.equals(studentData[1])) {
+                            Log.i("NFC reader", "Saved AnID is " + androidId + " and received AnID is " + studentData[1]);
+
+                            return msg;
+                        }
+                        else {
+                            Log.i("NFC reader", "Saved AnID is " + androidId + " but received AnID is " + studentData[1]);
+                            return null;
+                        }
+                    }
+                    else {
+                        Log.i("NFC reader", "List doesn't contain key, value is " + studentData[0]);
+                        return null;
+                    }
                 }
             }
             catch (IOException e) {
                 Log.d("On-time", "Error with exception" + e.getMessage());
-                return false;
+                return null;
             }
             finally {
                 try {
@@ -156,8 +215,8 @@ public class MainActivity extends AppCompatActivity {
 
         // This method is called in MAIN thread aka. UI thread
         @Override
-        protected void onPostExecute(Boolean connectResult) {
-            if (connectResult) {
+        protected void onPostExecute(String connectResult) {
+            if (connectResult != null) {
                 // NFC was found and successfully communicated.
                 /*try {
                     mediaPlayer.setDataSource(MainActivity.this, defaultRingtoneUri);
@@ -181,6 +240,8 @@ public class MainActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }*/
+                String[] studentData = connectResult.split(",");
+
                 Toast.makeText(MainActivity.this,"NFC found.", Toast.LENGTH_LONG).show();
             }
             else {

@@ -15,10 +15,15 @@ public class Student extends RealmObject {
     private String AndroidID;
 
     public String getID() {return ID;}
-    public void setID(String ID) {this.ID = "";}
+    public void setID(String ID) {this.ID = ID;}
     public String getAndroidID() {return AndroidID;}
-    public void setAndroidID(String ID) {this.AndroidID = "";}
+    public void setAndroidID(String ID) {this.AndroidID = ID;}
 
+
+    @Override
+    public String toString() {
+        return "Id = " + ID + " AndroidID = " + AndroidID;
+    }
 }
 
 
