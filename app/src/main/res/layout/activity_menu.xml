@@ -15,6 +15,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <TextView
+            android:text="เลือกวิชา"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:id="@+id/textView"
+            android:gravity="center_vertical" />
+
         <ListView
             android:fadingEdge="horizontal"
             android:listSelector="#FF47A7F0"
