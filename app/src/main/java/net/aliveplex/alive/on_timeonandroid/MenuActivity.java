@@ -353,26 +353,30 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     private void setTable() {
-        final String[] subID = new String[0];
-        final String[] subsec = new String[0];
+        //final String[] subID = new String[0];
+        //final String[] subsec = new String[0];
+        String[] subID = { "Aerith Gainsborough", "Barret Wallace", "Cait Sith"
+                , "Cid Highwind", "Cloud Strife", "RedXIII", "Sephiroth"
+                , "Tifa Lockhart", "Vincent Valentine", "Yuffie Kisaragi"
+                , "ZackFair" };
         final Realm realm = Realm.getDefaultInstance();
         realm.executeTransactionAsync(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
                 final RealmQuery<Subject> subject = realm.where(Subject.class);
                 final RealmResults<Subject> result = subject.findAll();
-                final int[] subID = new int[result.size()];
-                final String[] subsec = new String[result.size()];
+               // final int[] subID = new int[result.size()];
+                //final String[] subsec = new String[result.size()];
                 String readdata = "";
 
                 Log.i("List view", "executed ran");
-                for (int i = 0; i < result.size(); i++) {
+                /*for (int i = 0; i < result.size(); i++) {
                     HashMap<String,String> myMap = new HashMap<String, String>();
                     readdata = result.get(i).getID();
                     String[] splitLine = readdata.split(",");
                     subID[i] = Integer.parseInt(splitLine[0]);
 
-                }
+                }*/
                 String[] from = new String []{"ID","Sec"};
                 int [] to=new int[]{R.id.tvSubject,R.id.tvSec};
                 Log.i("List view", "reached setAdapter");

@@ -62,22 +62,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 public class ListAdapter extends BaseAdapter {
     Context mContext;
-    String[] subId;
+    String[] subID;
     int[] sec;
 
-    public ListAdapter(Context context, int strName, String[] sec) {
+    public ListAdapter(Context context, int subID, String[] sec) {
         this.mContext= context;
-        this.subId = strName;
+        this.subID = subID;
         this.sec = sec;
     }
 
     public int getCount() {
-        return subId.length;
+        return subID.length;
     }
 
     public Object getItem(int position) {
@@ -96,7 +95,7 @@ public class ListAdapter extends BaseAdapter {
             view = mInflater.inflate(R.layout.listtextview, parent, false);
 
         TextView SubID = (TextView)view.findViewById(R.id.text1);
-        SubID.setText(subId[position]);
+        SubID.setText(subID[position]);
         TextView Sec = (TextView)view.findViewById(R.id.text2);
         Sec.setText(sec[position]);
 
