@@ -97,7 +97,7 @@ public class ListAdapter extends BaseAdapter {
         TextView SubID = (TextView)view.findViewById(R.id.text1);
         SubID.setText(subID[position]);
         TextView Sec = (TextView)view.findViewById(R.id.text2);
-        Sec.setText(sec[position]);
+        Sec.setText(Integer.toString(sec[position]));
 
         return view;
     }

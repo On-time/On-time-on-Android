@@ -353,16 +353,16 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     private void setTable() {
-        final String[] subID = new String[0];
-        final int[] subsec = new int[0];
-        final Realm realm = Realm.getDefaultInstance();
+        final QuerySubjectResult queryResult = new QuerySubjectResult();
+        Realm realm = Realm.getDefaultInstance();
+
         realm.executeTransactionAsync(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
                 final RealmQuery<Subject> subject = realm.where(Subject.class);
                 final RealmResults<Subject> result = subject.findAll();
-               final String[] subID = new String[result.size()];
-                final int[] subsec = new int[result.size()];
+                String[] subID = new String[result.size()];
+                int[] subsec = new int[result.size()];
                 String readdata = "";
 
                 Log.i("List view", "executed ran");
@@ -374,14 +374,17 @@ public class MenuActivity extends AppCompatActivity {
                     subsec[i] = Integer.parseInt(splitLine[1]);
 
                 }
-                String[] from = new String []{"ID","Sec"};
-                int [] to=new int[]{R.id.tvSubject,R.id.tvSec};
-                Log.i("List view", "reached setAdapter");
-                Log.i("List view", "Adapter set, have result " + result.size());
+                
+                queryResult.setSubId(subID);
+                queryResult.setSubSection(subsec);
             }
-        }, new Realm.Transaction.OnSuccess() {
+        }, new OnSubjectQuerySuccess(queryResult) {
             @Override
             public void onSuccess() {
+                ListAdapter adapter = new ListAdapter(getApplicationContext(), getResult().getSubId(), getResult().getSubSection());
+                Log.i("List view", "reached setAdapter");
+                lv.setAdapter(adapter);
+                lv.invalidateViews();
                 Log.d("Set table", "setting table complete");
             }
         }, new Realm.Transaction.OnError() {
@@ -390,12 +393,41 @@ public class MenuActivity extends AppCompatActivity {
                 Log.d("Set table", "error when setting table: " + error.getMessage());
             }
         });
-        ListAdapter adapter = new ListAdapter(getApplicationContext(), subID, subsec);
-        ListView listView = (ListView)findViewById(R.id.lv);
-        listView.setAdapter(adapter);
-        lv.invalidateViews();
+    }
+
+    private static class QuerySubjectResult {
+        private String[] subId;
+
+        public int[] getSubSection() {
+            return subSection;
+        }
+
+        public void setSubSection(int[] subSection) {
+            this.subSection = subSection;
+        }
+
+        public String[] getSubId() {
+            return subId;
+        }
+
+        public void setSubId(String[] subId) {
+            this.subId = subId;
+        }
+
+        private int[] subSection;
+
 
     }
 
+    private static abstract class OnSubjectQuerySuccess implements Realm.Transaction.OnSuccess {
+        public QuerySubjectResult getResult() {
+            return result;
+        }
 
+        private QuerySubjectResult result;
+
+        public OnSubjectQuerySuccess(QuerySubjectResult result) {
+            this.result = result;
+        }
+    }
 }
