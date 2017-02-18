@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
     boolean isRotate = false;
     Uri defaultRingtoneUri;
     HashMap<String, String> currentStudents;
-    MediaPlayer mediaPlayer = new MediaPlayer();
+    //MediaPlayer mediaPlayer = new MediaPlayer();
     private PendingIntent mPendingIntent;
 
 
@@ -191,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
                 byte[] result = isoDep.transceive(selectAID);
 
                 if (result[0] != (byte)0x90) {
-
+                    Log.i("NFC reader", "Can't select command");
                     return null;
                 }
 
@@ -199,6 +199,7 @@ public class MainActivity extends AppCompatActivity {
                 byte[] unknowcommand = "unknowcommand".getBytes("UTF-8");
 
                 if (Arrays.equals(result, unknowcommand)) {
+                    Log.i("NFC reader", "AndroidId not found.");
                     return null;
                 }
                 else {
@@ -209,6 +210,11 @@ public class MainActivity extends AppCompatActivity {
                     if (currentStudents.containsKey(studentData[0])) {
                         Log.i("NFC reader", "List contain key, value is " + studentData[0]);
                         String androidId = currentStudents.get(studentData[0]);
+
+                        if (androidId == null) {
+                            return null;
+                        }
+
                         if (androidId.equals(studentData[1])) {
                             Log.i("NFC reader", "Saved AnID is " + androidId + " and received AnID is " + studentData[1]);
 

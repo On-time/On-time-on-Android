@@ -18,18 +18,19 @@
         <TextView
             android:text="เลือกวิชา"
             android:layout_width="match_parent"
-            android:layout_height="30dp"
+            android:layout_height="wrap_content"
             android:id="@+id/textView"
-            android:gravity="center_vertical" />
+            android:textSize="30sp"/>
 
         <ListView
             android:fadingEdge="horizontal"
-            android:listSelector="#FF47A7F0"
+            android:listSelector="?android:attr/colorFocusedHighlight"
             android:layout_width="fill_parent"
             android:layout_height="match_parent"
             android:padding="5dip"
             android:id="@+id/lv"
-            android:background="@android:color/background_light"
-            android:dividerHeight="10dp" />
+            android:divider="@android:color/darker_gray"
+            android:background="?android:attr/colorBackground"
+            android:dividerHeight="1dp" />
     </LinearLayout>
 </RelativeLayout>
