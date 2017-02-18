@@ -6,6 +6,8 @@ import android.net.Uri;
 import com.google.common.io.CharStreams;
 import com.google.gson.Gson;
 
+import org.joda.time.DateTime;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -25,11 +27,17 @@ import java.util.Map;
 
 public class JWTUtil {
     private static JWTUtil _instance = new JWTUtil();
-    //private Calendar expire;
+    private DateTime expire;
     private String token;
 
     public String getToken(String username, String password, boolean requestCheckingToken, boolean getNewToken) {
         HttpURLConnection urlConnection = null;
+        if (expire != null && token != null) {
+            DateTime now = new DateTime();
+            if (now.compareTo(expire) < 0) {
+                return token;
+            }
+        }
 
         try {
             Map<String, String> requestBody = new HashMap<>();
@@ -55,6 +63,8 @@ public class JWTUtil {
             Gson gson = new Gson();
             RequestTokenMessage message = gson.fromJson(jsonString, RequestTokenMessage.class);
             token = message.getAccess_token();
+            DateTime now = new DateTime();
+            expire = now.plusSeconds(message.expires_in);
 
             return token;
         }
