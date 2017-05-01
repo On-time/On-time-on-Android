@@ -1,7 +1,6 @@
 package net.aliveplex.alive.on_timeonandroid;
 
 import android.app.Dialog;
-import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,16 +11,16 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,11 +28,13 @@ import com.google.common.io.CharStreams;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import net.aliveplex.alive.on_timeonandroid.Adapters.ListAdapter;
+import net.aliveplex.alive.on_timeonandroid.Adapters.SubjectAdapter;
+import net.aliveplex.alive.on_timeonandroid.Interfaces.ClickListener;
+import net.aliveplex.alive.on_timeonandroid.Listeners.RecyclerTouchListener;
 import net.aliveplex.alive.on_timeonandroid.Message.RegisterReturnStatus;
 import net.aliveplex.alive.on_timeonandroid.Message.RegisterReturnStatusDeserializer;
-import net.aliveplex.alive.on_timeonandroid.Message.SimpleStudent;
-import net.aliveplex.alive.on_timeonandroid.Message.SimpleSubject;
-import net.aliveplex.alive.on_timeonandroid.Message.SimpleSubjectStudent;
+import net.aliveplex.alive.on_timeonandroid.Models.SubjectViewModel;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -49,19 +50,18 @@ import java.util.List;
 import java.util.Map;
 
 import io.realm.Realm;
-import io.realm.RealmConfiguration;
-import io.realm.RealmObject;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
 
-import static android.R.id.list;
 import static android.text.TextUtils.isEmpty;
 
 public class MenuActivity extends AppCompatActivity {
-    Dialog login;
-    Button butLogin,butClear;
-    EditText etUser,etPass;
-    ListView lv;
+    private Dialog login;
+    private Button butLogin,butClear;
+    private EditText etUser,etPass;
+    private RecyclerView mClassRecyclerView;
+    private SubjectAdapter subjectAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,7 +76,7 @@ public class MenuActivity extends AppCompatActivity {
         etPass = (EditText) login.findViewById(R.id.etPass);
         butLogin = (Button) login.findViewById(R.id.butLogin);
         butClear = (Button) login.findViewById(R.id.butClear);
-        lv = (ListView) findViewById(R.id.lv);
+        mClassRecyclerView = (RecyclerView) findViewById(R.id.lv);
 
         final String androidId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
@@ -115,20 +115,28 @@ public class MenuActivity extends AppCompatActivity {
                 finish();
             }
         });
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        mClassRecyclerView.setLayoutManager(layoutManager);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
+        mClassRecyclerView.addItemDecoration(dividerItemDecoration);
+        subjectAdapter = new SubjectAdapter(new ArrayList<SubjectViewModel>());
+        mClassRecyclerView.setAdapter(subjectAdapter);
+        mClassRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(this, mClassRecyclerView, new ClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                TextView text1 = (TextView) view.findViewById(R.id.text1);
-                TextView text2 = (TextView) view.findViewById(R.id.text2);
-                String subid = text1.getText().toString();
-                int sec = Integer.parseInt(text2.getText().toString());
-                Intent gonext = new Intent(MenuActivity.this,MainActivity.class);
-                Log.d("list view item", "Id is " + subid + " section is " + sec);
-                gonext.putExtra("ID",subid);
-                gonext.putExtra("Sec",sec);
-                startActivity(gonext);
+            public void onClick(View view, int position) {
+                SubjectViewModel subjectViewModel = subjectAdapter.getSubjectList().get(position);
+                Intent intent = new Intent(MenuActivity.this, MainActivity.class);
+                intent.putExtra(Constant.SUBJECT_ID_EXTRA, subjectViewModel.getSubjectId());
+                intent.putExtra(Constant.SECTION_EXTRA, subjectViewModel.getSection());
+                startActivity(intent);
             }
-        });
+
+            @Override
+            public void onLongClick(View view, int position) {
+
+            }
+        }));
 
         Realm.init(this);
         LoginCheck();
@@ -358,7 +366,7 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     private void setTable() {
-        final QuerySubjectResult queryResult = new QuerySubjectResult();
+        final List<SubjectViewModel> subjectViewModelsList = new ArrayList<>();
         Realm realm = Realm.getDefaultInstance();
 
         realm.executeTransactionAsync(new Realm.Transaction() {
@@ -366,31 +374,20 @@ public class MenuActivity extends AppCompatActivity {
             public void execute(Realm realm) {
                 final RealmQuery<Subject> subject = realm.where(Subject.class);
                 final RealmResults<Subject> result = subject.findAll();
-                String[] subID = new String[result.size()];
-                int[] subsec = new int[result.size()];
-                String readdata = "";
+                String readdata;
 
                 Log.i("List view", "executed ran");
                 for (int i = 0; i < result.size(); i++) {
-                    HashMap<String,String> myMap = new HashMap<String, String>();
                     readdata = result.get(i).getID();
                     String[] splitLine = readdata.split(",");
-                    subID[i] = splitLine[0];
-                    subsec[i] = Integer.parseInt(splitLine[1]);
-
+                    subjectViewModelsList.add(new SubjectViewModel(splitLine[0], Integer.parseInt(splitLine[1])));
                 }
-                
-                queryResult.setSubId(subID);
-                queryResult.setSubSection(subsec);
             }
-        }, new OnSubjectQuerySuccess(queryResult) {
+        }, new OnSubjectQuerySuccess(subjectViewModelsList) {
             @Override
             public void onSuccess() {
-                ListAdapter adapter = new ListAdapter(getApplicationContext(), getResult().getSubId(), getResult().getSubSection());
-                Log.i("List view", "reached setAdapter");
-                lv.setAdapter(adapter);
-                lv.invalidateViews();
-                Log.d("Set table", "setting table complete");
+                subjectAdapter.getSubjectList().addAll(getResult());
+                subjectAdapter.notifyDataSetChanged();
             }
         }, new Realm.Transaction.OnError() {
             @Override
@@ -400,38 +397,14 @@ public class MenuActivity extends AppCompatActivity {
         });
     }
 
-    private static class QuerySubjectResult {
-        private String[] subId;
-
-        public int[] getSubSection() {
-            return subSection;
-        }
-
-        public void setSubSection(int[] subSection) {
-            this.subSection = subSection;
-        }
-
-        public String[] getSubId() {
-            return subId;
-        }
-
-        public void setSubId(String[] subId) {
-            this.subId = subId;
-        }
-
-        private int[] subSection;
-
-
-    }
-
     private static abstract class OnSubjectQuerySuccess implements Realm.Transaction.OnSuccess {
-        public QuerySubjectResult getResult() {
+        public List<SubjectViewModel> getResult() {
             return result;
         }
 
-        private QuerySubjectResult result;
+        private List<SubjectViewModel> result;
 
-        public OnSubjectQuerySuccess(QuerySubjectResult result) {
+        public OnSubjectQuerySuccess(List<SubjectViewModel> result) {
             this.result = result;
         }
     }

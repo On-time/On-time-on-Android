@@ -4,10 +4,7 @@
     android:id="@+id/activity_menu"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingTop="20dp"
     tools:context="net.aliveplex.alive.on_timeonandroid.MenuActivity">
 
     <LinearLayout
@@ -17,20 +14,20 @@
 
         <TextView
             android:text="เลือกวิชา"
+            android:layout_gravity="center_vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textStyle="bold"
             android:id="@+id/textView"
-            android:textSize="30sp"/>
+            android:textColor="@color/ma_text_dark_secondary_54"
+            android:textSize="14sp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"/>
 
-        <ListView
-            android:fadingEdge="horizontal"
-            android:listSelector="?android:attr/colorFocusedHighlight"
-            android:layout_width="fill_parent"
-            android:layout_height="match_parent"
-            android:padding="5dip"
+        <android.support.v7.widget.RecyclerView
             android:id="@+id/lv"
-            android:divider="@android:color/darker_gray"
-            android:background="?android:attr/colorBackground"
-            android:dividerHeight="1dp" />
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical" />
     </LinearLayout>
 </RelativeLayout>

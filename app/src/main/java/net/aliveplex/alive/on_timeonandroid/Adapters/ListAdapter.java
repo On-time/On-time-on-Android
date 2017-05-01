@@ -27,7 +27,7 @@ public class ListAdapter extends ArrayAdapter<Subject>{
     private final ArrayList<Subject> itemsArrayList;
     final Realm realm = Realm.getDefaultInstance();
     public ListAdapter(Context context, ArrayList<Subject> itemsArrayList) {
-        super(context, R.layout.listtextview, R.id.lv);
+        super(context, R.layout.listtextview, R.id.classList);
         this.context = context;
         this.itemsArrayList = itemsArrayList;
     }
@@ -55,7 +55,7 @@ public class ListAdapter extends ArrayAdapter<Subject>{
 
 }
 */
-package net.aliveplex.alive.on_timeonandroid;
+package net.aliveplex.alive.on_timeonandroid.Adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -63,6 +63,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+
+import net.aliveplex.alive.on_timeonandroid.R;
 
 public class ListAdapter extends BaseAdapter {
     Context mContext;
@@ -102,9 +104,9 @@ public class ListAdapter extends BaseAdapter {
         if(view == null)
             view = mInflater.inflate(R.layout.listtextview, parent, false);
 
-        TextView SubID = (TextView)view.findViewById(R.id.text1);
+        TextView SubID = (TextView)view.findViewById(R.id.subject_id_textview);
         SubID.setText(subID[position]);
-        TextView Sec = (TextView)view.findViewById(R.id.text2);
+        TextView Sec = (TextView)view.findViewById(R.id.section_textview);
         Sec.setText(Integer.toString(sec[position]));
 
         return view;

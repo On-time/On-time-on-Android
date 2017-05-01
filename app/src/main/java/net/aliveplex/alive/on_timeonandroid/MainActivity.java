@@ -12,9 +12,11 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -49,8 +51,9 @@ import io.realm.RealmResults;
 
 public class MainActivity extends AppCompatActivity {
     NfcAdapter mAdapter;
-    Button butBack;
     TextView tvSubID;
+    TextView tvSection;
+    TextView numberOfStudent;
     String subjectId;
     int subjectSection;
     boolean isRotate = false;
@@ -65,8 +68,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         if (!isRotate) {
-            subjectId = getIntent().getStringExtra("ID");
-            subjectSection = getIntent().getIntExtra("Sec", -1);
+            subjectId = getIntent().getStringExtra(Constant.SUBJECT_ID_EXTRA);
+            subjectSection = getIntent().getIntExtra(Constant.SECTION_EXTRA, -1);
             isRotate = true;
         }
 
@@ -75,15 +78,10 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
         tvSubID = (TextView) findViewById(R.id.tvSubID);
+        tvSection = (TextView)findViewById(R.id.tvSection);
+        numberOfStudent = (TextView)findViewById(R.id.number_of_student);
         tvSubID.setText(subjectId);
-        butBack = (Button) findViewById(R.id.butBack);
-        butBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent goBack = new Intent(MainActivity.this, MenuActivity.class);
-                startActivity(goBack);
-            }
-        });
+        tvSection.setText(String.format("Section %d", subjectSection));
 
         mAdapter = NfcAdapter.getDefaultAdapter(this);
         if (mAdapter == null) {
@@ -158,6 +156,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess() {
                 Toast.makeText(MainActivity.this,"Reader is ready.", Toast.LENGTH_LONG).show();
+                numberOfStudent.setText(String.format("%d", currentStudents.size()));
             }
         });
     }
